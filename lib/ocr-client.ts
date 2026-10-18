@@ -97,6 +97,16 @@ function canvasFor(img: HTMLImageElement, angle: number, enhance: boolean) {
 
 export type LabelReading = { batch: string | null; product: string | null; via: "device" | "server" }
 
+async function shrinkForUpload(file: File, max = 1280): Promise<string> {
+  const img = await loadImage(file)
+  const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight))
+  const c = document.createElement("canvas")
+  c.width = Math.round(img.naturalWidth * k)
+  c.height = Math.round(img.naturalHeight * k)
+  c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height)
+  return c.toDataURL("image/jpeg", 0.85)
+}
+
 /**
  * Read a label. The result is only ever a suggestion: on a curved, tilted label digits get dropped or swapped.
  * Tries a few small rotations (handheld photos are tilted) and stops once two passes agree on a batch.
@@ -106,13 +116,13 @@ export async function readLabel(
   opts: { server?: boolean; onStatus?: (key: "loading" | "reading", i?: number, n?: number) => void; onProgress?: (pct: number) => void } = {},
 ): Promise<LabelReading> {
   if (opts.server) {
-    const image = await new Promise<string>((res, rej) => {
-      const r = new FileReader()
-      r.onload = () => res(r.result as string)
-      r.onerror = rej
-      r.readAsDataURL(file)
-    })
-    const out = await fetch("/api/ocr", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ image }) })
+    // A phone photo is several MB; the model only needs ~1280px, and Vercel rejects bodies over 4.5 MB.
+    const image = await shrinkForUpload(file)
+    const ctl = new AbortController()
+    const timer = setTimeout(() => ctl.abort(), 25_000)
+    const out = await fetch("/api/ocr", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ image }), signal: ctl.signal })
+      .catch((e: Error) => { throw new Error(e.name === "AbortError" ? "AI reading timed out; try the on-device reader or type the batch number" : "could not reach the server") })
+      .finally(() => clearTimeout(timer))
     const j = await out.json()
     if (!out.ok) throw new Error(j.error || "could not read the photo")
     return { batch: j.batch, product: j.product, via: "server" }
