@@ -2,7 +2,7 @@
 
 import { useT } from "@/components/I18n";
 import { Tile } from "@/components/Tile";
-import { fmtMmYyyy, fmtYm } from "@/lib/format";
+import { entityUrl, fmtMmYyyy, fmtYm } from "@/lib/format";
 import type { Match, Verdict } from "@/lib/types";
 import Link from "next/link";
 
@@ -97,7 +97,14 @@ export function VerdictCard({ v, detail = false }: { v: Verdict; detail?: boolea
             </div>
             <details className="mt-3 text-[12px] text-mute" open={detail}>
               <summary className="cursor-pointer">{t("entity")}</summary>
-              {shown.map((m) => <div key={m.key} className="mt-1 break-all font-[family-name:var(--font-mono)] text-[11px]">{m.key}</div>)}
+              {shown.map((m) => (
+                <a
+                  key={m.key} href={entityUrl(m.key)} target="_blank" rel="noopener noreferrer" title={t("viewOnArkiv")}
+                  className="mt-1.5 block break-all font-[family-name:var(--font-mono)] text-[11px] text-[#f3d5a8] underline decoration-white/25 underline-offset-4 hover:decoration-[#f3d5a8]"
+                >
+                  {m.key} ↗
+                </a>
+              ))}
             </details>
             <div className="mt-5 flex flex-wrap gap-2">
               <a

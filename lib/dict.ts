@@ -40,7 +40,7 @@ export const en = {
   notFoundH: "Not on any list we mirror", notFoundP: "That is not proof the medicine is safe. Many bad batches are never listed.",
   product: "product", batch: "batch", mfg: "made", exp: "expiry", maker: "manufacturer", alertSources: "alert sources", view: "view", press: "press report", unknown: "unknown",
   share: "Share on WhatsApp", reportThis: "Seen it on a shelf? Report",
-  sightN: (n: number) => `${n} sighting${n > 1 ? "s" : ""} on shelves`, unchangeable: "Unchangeable on Arkiv", entity: "Arkiv records",
+  sightN: (n: number) => `${n} sighting${n > 1 ? "s" : ""} on shelves`, unchangeable: "Unchangeable on Arkiv", entity: "Arkiv records", viewOnArkiv: "Open this record in the Arkiv explorer",
   // alerts page
   aEyebrow: "alerts", aTitle: "Every live alert", aLede: "Each batch below is on a public recall or quality list and stays on Arkiv until its printed expiry date. Open one to see every authority that flagged it.",
   aSearch: "Search by medicine or manufacturer", byProduct: "Medicine", byMfr: "Maker",
@@ -120,7 +120,7 @@ export const hi: Partial<typeof en> = {
   notFoundH: "हमारी किसी भी सूची में नहीं मिला", notFoundP: "इसका मतलब यह नहीं कि दवा सुरक्षित है। कई खराब बैच कभी सूचीबद्ध नहीं होते।",
   product: "दवा", batch: "बैच", mfg: "निर्मित", exp: "एक्सपायरी", maker: "निर्माता", alertSources: "अलर्ट के स्रोत", view: "देखें", press: "समाचार रिपोर्ट", unknown: "अज्ञात",
   share: "WhatsApp पर साझा करें", reportThis: "दुकान पर दिखा? रिपोर्ट करें",
-  sightN: (n) => `दुकानों पर ${n} रिपोर्ट`, unchangeable: "Arkiv पर अपरिवर्तनीय", entity: "Arkiv रिकॉर्ड",
+  sightN: (n) => `दुकानों पर ${n} रिपोर्ट`, unchangeable: "Arkiv पर अपरिवर्तनीय", entity: "Arkiv रिकॉर्ड", viewOnArkiv: "इस रिकॉर्ड को Arkiv एक्सप्लोरर में खोलें",
   aEyebrow: "अलर्ट", aTitle: "सभी सक्रिय अलर्ट", aLede: "नीचे का हर बैच किसी सार्वजनिक रिकॉल या गुणवत्ता सूची में है और छपी एक्सपायरी तारीख तक Arkiv पर रहता है। किसी को खोलकर देखें कि किन प्राधिकरणों ने उसे चिह्नित किया।",
   aSearch: "दवा या निर्माता से खोजें", byProduct: "दवा", byMfr: "निर्माता",
   colProduct: "दवा", colBatch: "बैच", colType: "प्रकार", colListed: "सूचीबद्ध",

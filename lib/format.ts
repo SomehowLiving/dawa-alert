@@ -18,3 +18,11 @@ export function shortKey(k?: string) {
 
 export const batchHref = (m: { batch: string; product: string }) =>
   `/batch?batch=${encodeURIComponent(m.batch)}&product=${encodeURIComponent(m.product)}`
+
+export const EXPLORER_URL = "https://data.arkiv.network"
+
+/**
+ * Where to look at an Arkiv entity by key. The data explorer reads `?q=<key>` and runs the lookup by itself, showing the
+ * owner, attributes, payload and expiry. A malformed key falls back to the explorer home rather than building an odd URL.
+ */
+export const entityUrl = (key: string) => (/^0x[0-9a-fA-F]{64}$/.test(key) ? `${EXPLORER_URL}/?q=${key}` : EXPLORER_URL)
