@@ -16,21 +16,39 @@ export function ScanCard({ server, onUse }: { server: boolean; onUse: (batch: st
   const input = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>({ k: "idle" });
   const thumbRef = useRef<string | null>(null);
+  const fileRef = useRef<File | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
   useEffect(() => () => { if (thumbRef.current) URL.revokeObjectURL(thumbRef.current); }, []);
 
   async function onFile(file: File) {
     if (thumbRef.current) URL.revokeObjectURL(thumbRef.current);
     const thumb = (thumbRef.current = URL.createObjectURL(file));
+    fileRef.current = file;
     setPhase({ k: "working", msg: t("ocrLoading"), pct: 0, thumb });
     try {
+      // Always the device first: the photo stays on the phone unless the person asks for AI reading below.
       const reading = await readLabel(file, {
-        server,
+        server: false,
         onStatus: (key, i, n) => setPhase((p) => (p.k === "working" ? { ...p, msg: key === "loading" ? t("ocrLoading") : t("ocrReading", i ?? 1, n ?? 1) } : p)),
         onProgress: (pct) => setPhase((p) => (p.k === "working" ? { ...p, pct } : p)),
       });
       setPhase({ k: "done", reading, thumb });
     } catch (e) {
       setPhase({ k: "error", msg: (e as Error).message });
+    }
+  }
+
+  async function tryAi() {
+    const file = fileRef.current, thumb = thumbRef.current;
+    if (!file || !thumb) return;
+    setAiBusy(true);
+    try {
+      const reading = await readLabel(file, { server: true });
+      setPhase({ k: "done", reading, thumb });
+    } catch (e) {
+      setPhase({ k: "error", msg: (e as Error).message });
+    } finally {
+      setAiBusy(false);
     }
   }
 
@@ -82,6 +100,14 @@ export function ScanCard({ server, onUse }: { server: boolean; onUse: (batch: st
               </>
             ) : <div className="font-medium">{t("ocrNone")}</div>}
             <div className="mt-1.5 text-[12px] text-mute">{t(phase.reading.via === "server" ? "ocrServer" : "ocrWhere")}</div>
+            {server && phase.reading.via === "device" ? (
+              <div className="mt-2.5">
+                <button type="button" disabled={aiBusy} onClick={() => void tryAi()} className="rounded-full bg-white/[0.07] px-3.5 py-1.5 text-[12px] hairline hover:bg-white/10 disabled:opacity-60">
+                  {aiBusy ? t("aiWorking") : t("aiTry")}
+                </button>
+                <span className="ml-2 text-[11px] text-mute">{t("aiNote")}</span>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

@@ -1,7 +1,7 @@
 // The one place that reads environment variables and builds real clients.
 import { createApi, type Api } from "./api.ts"
 import { makePublicClient, makeWalletClient } from "./arkiv.ts"
-import { makeOcr } from "./ocr.ts"
+import { makeGeminiOcr, makeOcr } from "./ocr.ts"
 
 const g = globalThis as { __dawaApi?: Api }
 
@@ -11,7 +11,12 @@ export function getApi(): Api {
     pub: makePublicClient(process.env.ARKIV_RPC),
     wallet: process.env.PRIVATE_KEY ? makeWalletClient(process.env.PRIVATE_KEY, process.env.ARKIV_RPC) : undefined,
     ratePerHour: Number(process.env.RELAY_RATE_PER_HOUR ?? 20),
-    ocr: process.env.ANTHROPIC_API_KEY ? makeOcr(process.env.ANTHROPIC_API_KEY) : undefined,
+    // Server-side vision is optional; without a key the browser reads labels on the device instead.
+    ocr: process.env.GEMINI_API_KEY
+      ? makeGeminiOcr(process.env.GEMINI_API_KEY, fetch, process.env.GEMINI_MODEL || "gemini-2.5-flash")
+      : process.env.ANTHROPIC_API_KEY
+        ? makeOcr(process.env.ANTHROPIC_API_KEY)
+        : undefined,
   })
   return g.__dawaApi
 }

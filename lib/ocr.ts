@@ -20,6 +20,37 @@ export function parseLabelJson(text: string): LabelReading {
   }
 }
 
+const DATA_URL = /^data:(image\/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/
+
+/**
+ * Google Gemini vision. The key goes in a header, not the URL, so it stays out of logs. Temperature 0, a JSON schema so the
+ * reply is always parseable, and thinking off: this is a read-the-label task, not a reasoning one, and thinking only adds delay.
+ */
+export function makeGeminiOcr(apiKey: string, fetchImpl: typeof fetch = fetch, model = "gemini-2.5-flash") {
+  return async (dataUrl: string): Promise<LabelReading> => {
+    const m = DATA_URL.exec(dataUrl)
+    if (!m) throw new Error("expected a base64 image data URL (jpeg, png, webp or gif)")
+    if (m[2]!.length > 7_000_000) throw new Error("image too large")
+    const res = await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "x-goog-api-key": apiKey, "content-type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ inline_data: { mime_type: m[1], data: m[2] } }, { text: PROMPT }] }],
+        generationConfig: {
+          temperature: 0,
+          maxOutputTokens: 200,
+          responseMimeType: "application/json",
+          responseSchema: { type: "OBJECT", properties: { batch: { type: "STRING", nullable: true }, product: { type: "STRING", nullable: true } }, required: ["batch", "product"] },
+          thinkingConfig: { thinkingBudget: 0 },
+        },
+      }),
+    })
+    if (!res.ok) throw new Error(`vision API ${res.status}`)
+    const body = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
+    return parseLabelJson(body.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "")
+  }
+}
+
 export function makeOcr(apiKey: string, fetchImpl: typeof fetch = fetch, model = "claude-sonnet-5-5") {
   return async (dataUrl: string): Promise<LabelReading> => {
     const m = /^data:(image\/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl)
