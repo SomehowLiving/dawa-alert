@@ -85,6 +85,10 @@ printf '%s' "$ARKIV_API_KEY"   | vercel env add ARKIV_API_KEY production --sensi
 vercel deploy --prod
 ```
 
+Commit with your GitHub **numeric** no-reply address (`ID+username@users.noreply.github.com`, see github.com/settings/emails).
+On the Hobby plan Vercel blocks any deploy whose git author it cannot map to a team member ("commit author doesn't have
+permission"), and the legacy `username@users.noreply.github.com` form does not resolve.
+
 Only those two variables are required (add `ANTHROPIC_API_KEY` to read photos with Claude vision). Run `npm run seed` /
 `npm run stats` locally to publish data and the dashboard snapshot; the deployed app only reads (plus the sighting relay).
 
