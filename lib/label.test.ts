@@ -10,11 +10,23 @@ describe("findBatch", () => {
     ["Lot 4032409004", "4032409004"],
     ["Batch Number: PBEAL001", "PBEAL001"],
     ["batch no, a1254", "A1254"], // OCR turns the full stop into a comma and lower-cases
+    ["B.No.: DL24A017    Mfg: 08/2025   Exp: 07/2027", "DL24A017"], // two punctuation marks, other fields on the line
+    ["B. No. : SR-13 Mfg 05/25", "SR-13"],
   ])("%s -> %s", (line, want) => expect(findBatch(line)).toBe(want))
 
   it("reads a real, messy OCR pass: keeps what it can see, never invents the rest", () => {
     // Actual Tesseract output for a tilted label whose true batch is A1254.
     expect(findBatch("Coldrif\nCough Sy, up\nBatch No, A12\nMfg. Date 12/20\nExp. Date 11/2")).toBe("A12")
+  })
+  it("reads a keyword and its value from separate boxes (PaddleOCR style)", () => {
+    expect(findBatch("Coldrif\nCough Syrup\nBatch No.\nA1254\nMfg. Date\n12/2024\nExp. Date\n11/2026")).toBe("A1254")
+    expect(findBatch("B.No.:\nSR-13")).toBe("SR-13")
+    expect(findBatch("Lot\n4032409004")).toBe("4032409004")
+  })
+  it("never takes a date from the next line as the batch", () => {
+    expect(findBatch("Batch No.\n12/2024")).toBeNull()
+    expect(findBatch("Batch No.\n11-2026\nExp. Date")).toBeNull()
+    expect(findBatch("Batch No.\nMfg. Date 12/2024")).toBeNull()
   })
   it("ignores keyword followed by a word, not a batch", () => {
     expect(findBatch("Batch No. Date")).toBeNull()

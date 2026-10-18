@@ -62,11 +62,16 @@ by more than 20% (`--force` overrides). `npm run stats` republishes just the das
 **Pages:** `/` the floor (check a batch, charts, recent alerts, map), `/alerts` browse and filter every live alert,
 `/batch?batch=…` one batch in full, `/map` sightings, `/report` report a sighting, `/about`. English and Hindi.
 
-**Photo reading.** "Scan the batch number" works out of the box: it reads the label *on the device* with Tesseract
-(trying a few small rotations), so the photo never leaves the phone. It is only ever a **suggestion**: the guess is shown
-next to the photo with a "Use this batch" button and a warning, and never fills the field by itself, because on a tilted,
-curved label it drops or swaps digits (on our test bottle it read `A12` for `A1254`). Set `ANTHROPIC_API_KEY` to use
-Claude vision on the server instead (more accurate; the image is forwarded once and not stored).
+**Photo reading.** "Scan the batch number" works out of the box and runs *on the device*, so the photo never leaves the phone:
+[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) (PP-OCRv5 on onnxruntime-web, via the official
+[`@paddleocr/paddleocr-js`](https://www.paddleocr.ai/latest/en/version3.x/inference_deployment/cross_platform/browser.html) SDK),
+with [Tesseract.js](https://github.com/naptha/tesseract.js) as a fallback if it cannot start. The two models (~21 MB) are
+downloaded by `scripts/fetch-ocr-models.mjs` before `dev`/`build` and served from `/ocr`, because the model bucket sends no CORS
+header. PaddleOCR returns "Batch No." and its value as separate boxes, so `lib/label.ts` reads a keyword's value from the next
+line, and refuses dates as batch values. On our test bottle it reads `A1254` exactly (Tesseract read `A12`), and on synthetic
+labels (one-line, 12° tilt, noisy foil strip, "LOT" style) it read all four; a label with no batch returns nothing.
+It is still only ever a **suggestion**: the guess is shown next to the photo with a "Use this batch" button and a warning,
+and never fills the field by itself. Set `ANTHROPIC_API_KEY` to use Claude vision on the server instead.
 
 `PRIVATE_KEY` is the wallet that creates every Arkiv entity. Its address is shown at `/api/health`; list it on the
 submission form.
@@ -120,6 +125,11 @@ npm run test:live   # lib/e2e.live.ts against Tiramisu; needs a funded PRIVATE_K
 
 The live test writes tagged entities, proves an alert cannot be deleted once locked and cannot be
 edited even by its owner when unlocked, then deletes what it can.
+
+## Open source used
+
+Next.js, React, Tailwind, [Arkiv SDK](https://github.com/arkiv-network/arkiv-sdk-js), viem, Leaflet + OpenStreetMap tiles,
+PaddleOCR (Apache-2.0), Tesseract.js (Apache-2.0), pdfplumber (data parsing). Data from CDSCO, WHO and Telangana DCA public notices.
 
 ## Limits, stated plainly
 

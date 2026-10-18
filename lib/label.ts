@@ -2,17 +2,32 @@
 // Pure functions, no DOM: unit-tested in tests/unit/label.test.ts.
 
 const KEY = String.raw`(?:b\s*\.?\s*no|batch\s*(?:no|number|num|#)?|lot\s*(?:no|number|#)?)`
-const BATCH_RE = new RegExp(String.raw`\b${KEY}\b\s*[.,:;\-#]?\s*([A-Z0-9][A-Z0-9\-\/]{1,19})`, "i")
+const BATCH_RE = new RegExp(String.raw`\b${KEY}\b\s*[.,:;\-#\s]*([A-Z0-9][A-Z0-9\-\/]{1,19})`, "i")
 const NOT_BATCH = /^(mfg|mfd|exp|date|no|dt|price|mrp|each|ml|mg|use|by)$/i
 const LABEL_WORDS = /\b(batch|b\.?\s*no|lot|mfg|mfd|manufactur|exp|expiry|date|mrp|price|each|contains|store|keep|dosage|use|schedule|rx|only|ip|bp|usp)\b/i
 
-/** Best batch token in a block of OCR text, or null. A batch number almost always contains a digit. */
+const KEY_ONLY = new RegExp(String.raw`^\s*${KEY}\s*[.,:;\-#]*\s*$`, "i")
+const DATE_LIKE = /^\d{1,2}[/\-.]\d{2,4}$|^\d{4}$/ // an expiry or manufacturing date is never the batch
+
+const clean = (tok: string) => tok.replace(/[\-\/]+$/, "")
+const plausible = (tok: string) => tok.length >= 2 && /\d/.test(tok) && !NOT_BATCH.test(tok) && !DATE_LIKE.test(tok)
+
+/** Best batch token in a block of OCR text, or null. A batch number almost always contains a digit.
+ *  Readers differ: Tesseract returns "Batch No. A1254" as one line, PaddleOCR as two boxes ("Batch No." then
+ *  "A1254"), so a keyword alone on a line takes its value from the next line. */
 export function findBatch(text: string): string | null {
-  for (const line of String(text).split(/\n+/)) {
-    const m = BATCH_RE.exec(line)
-    if (!m) continue
-    const tok = m[1].replace(/[\-\/]+$/, "")
-    if (tok.length >= 2 && /\d/.test(tok) && !NOT_BATCH.test(tok)) return tok.toUpperCase()
+  const lines = String(text).split(/\n+/)
+  for (let i = 0; i < lines.length; i++) {
+    const m = BATCH_RE.exec(lines[i]!)
+    if (m) {
+      const tok = clean(m[1]!)
+      if (plausible(tok)) return tok.toUpperCase()
+    }
+    if (KEY_ONLY.test(lines[i]!)) {
+      const next = /^\s*[.,:;\-#]*\s*([A-Z0-9][A-Z0-9\-\/]{1,19})\b/i.exec(lines[i + 1] ?? "")
+      const tok = next ? clean(next[1]!) : ""
+      if (tok && plausible(tok)) return tok.toUpperCase()
+    }
   }
   return null
 }

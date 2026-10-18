@@ -15,10 +15,14 @@
     "sync": "npm run data:portal && npm run seed",
     "data:portal": "python3 -I scripts/fetch_portal.py",
     "data:pdf": "python3 -I scripts/fetch_cdsco.py && python3 -I scripts/parse_cdsco.py",
-    "stats": "node --env-file-if-exists=.env.local scripts/publish-stats.ts"
+    "stats": "node --env-file-if-exists=.env.local scripts/publish-stats.ts",
+    "models": "node scripts/fetch-ocr-models.mjs",
+    "predev": "node scripts/fetch-ocr-models.mjs",
+    "prebuild": "node scripts/fetch-ocr-models.mjs"
   },
   "dependencies": {
     "@arkiv-network/sdk": "^0.8.1",
+    "@paddleocr/paddleocr-js": "^0.4.2",
     "leaflet": "^1.9.4",
     "next": "16.4.0",
     "react": "19.3.0",

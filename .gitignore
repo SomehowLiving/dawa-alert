@@ -19,6 +19,9 @@ data/raw/*
 !data/raw/nsq-2025-03.pdf
 data/raw/*.tmp
 
+# OCR models are downloaded by scripts/fetch-ocr-models.mjs (run automatically before dev/build)
+public/ocr/*.tar
+
 # editor / OS
 .DS_Store
 .idea
