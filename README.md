@@ -8,7 +8,7 @@ Every time, the warning was already out there somewhere. It just never reached t
 **Dawa Alert** lets anyone check a medicine batch against every official recall and quality alert we can find.
 Type or photograph the batch number and get an answer in a second, from a record that nobody can quietly remove.
 
-**Live:** https://dawa-alert.vercel.app (Arkiv Tiramisu testnet) · **Demo video:** _link_ · **Licence:** MIT
+**Live:** https://dawa-alert.vercel.app (Arkiv Tiramisu testnet) · **Demo video:** [YouTube](https://www.youtube.com/watch?v=NyErgz0cEUY) · **Licence:** MIT
 
 ![Home: check a batch, scan a label, live stats](assets/home.png)
 
