@@ -10,6 +10,9 @@ on their own sites and in their own PDFs. A chemist or a parent holding a bottle
 batch on CDSCO's published lists (~3,500 flagged batches since Jan 2025, of which ~2,100 are still within
 their printed expiry) plus WHO's alert for the three contaminated syrups.
 
+**Live:** https://dawa-alert.vercel.app (Tiramisu testnet). Source data and the entities it reads are public; the relay wallet that
+creates sightings is listed in [arkiv/schema.md](arkiv/schema.md).
+
 ## Why Arkiv
 
 | Need | What breaks elsewhere | What Arkiv gives |
@@ -67,6 +70,18 @@ Claude vision on the server instead (more accurate; the image is forwarded once 
 
 `PRIVATE_KEY` is the wallet that creates every Arkiv entity. Its address is shown at `/api/health`; list it on the
 submission form.
+
+## Deploy (Vercel)
+
+```bash
+vercel link --project dawa-alert
+printf '%s' "$PRIVATE_KEY"     | vercel env add PRIVATE_KEY production --sensitive
+printf '%s' "$ARKIV_API_KEY"   | vercel env add ARKIV_API_KEY production --sensitive
+vercel deploy --prod
+```
+
+Only those two variables are required (add `ANTHROPIC_API_KEY` to read photos with Claude vision). Run `npm run seed` /
+`npm run stats` locally to publish data and the dashboard snapshot; the deployed app only reads (plus the sighting relay).
 
 ## Structure
 
