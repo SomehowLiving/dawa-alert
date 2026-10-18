@@ -17,6 +17,7 @@ export function ScanCard({ server, onUse }: { server: boolean; onUse: (batch: st
   const [phase, setPhase] = useState<Phase>({ k: "idle" });
   const thumbRef = useRef<string | null>(null);
   const fileRef = useRef<File | null>(null);
+  const run = useRef(0); // whichever read the person last started owns the screen; a slower one is ignored
   const [aiBusy, setAiBusy] = useState(false);
   useEffect(() => () => { if (thumbRef.current) URL.revokeObjectURL(thumbRef.current); }, []);
 
@@ -24,31 +25,34 @@ export function ScanCard({ server, onUse }: { server: boolean; onUse: (batch: st
     if (thumbRef.current) URL.revokeObjectURL(thumbRef.current);
     const thumb = (thumbRef.current = URL.createObjectURL(file));
     fileRef.current = file;
+    const mine = ++run.current;
     setPhase({ k: "working", msg: t("ocrLoading"), pct: 0, thumb });
     try {
       // Always the device first: the photo stays on the phone unless the person asks for AI reading below.
       const reading = await readLabel(file, {
         server: false,
-        onStatus: (key, i, n) => setPhase((p) => (p.k === "working" ? { ...p, msg: key === "loading" ? t("ocrLoading") : t("ocrReading", i ?? 1, n ?? 1) } : p)),
-        onProgress: (pct) => setPhase((p) => (p.k === "working" ? { ...p, pct } : p)),
+        onStatus: (key, i, n) => mine === run.current && setPhase((p) => (p.k === "working" ? { ...p, msg: key === "loading" ? t("ocrLoading") : t("ocrReading", i ?? 1, n ?? 1) } : p)),
+        onProgress: (pct) => mine === run.current && setPhase((p) => (p.k === "working" ? { ...p, pct } : p)),
       });
-      setPhase({ k: "done", reading, thumb });
+      if (mine === run.current) setPhase({ k: "done", reading, thumb });
     } catch (e) {
-      setPhase({ k: "error", msg: (e as Error).message });
+      if (mine === run.current) setPhase({ k: "error", msg: (e as Error).message });
     }
   }
 
   async function tryAi() {
     const file = fileRef.current, thumb = thumbRef.current;
     if (!file || !thumb) return;
+    const mine = ++run.current; // supersedes a device read that is still running
     setAiBusy(true);
+    setPhase({ k: "working", msg: t("aiWorking"), pct: 100, thumb });
     try {
       const reading = await readLabel(file, { server: true });
-      setPhase({ k: "done", reading, thumb });
+      if (mine === run.current) setPhase({ k: "done", reading, thumb });
     } catch (e) {
-      setPhase({ k: "error", msg: (e as Error).message });
+      if (mine === run.current) setPhase({ k: "error", msg: (e as Error).message });
     } finally {
-      setAiBusy(false);
+      if (mine === run.current) setAiBusy(false);
     }
   }
 
@@ -79,6 +83,12 @@ export function ScanCard({ server, onUse }: { server: boolean; onUse: (batch: st
           <div className="flex-1 text-[13px]">
             {phase.msg}
             <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-[#e8c9a0] transition-all" style={{ width: `${phase.pct}%` }} /></div>
+            {server && !aiBusy ? (
+              <div className="mt-2.5">
+                <button type="button" onClick={() => void tryAi()} className="rounded-full bg-white/[0.07] px-3.5 py-1.5 text-[12px] hairline hover:bg-white/10">{t("aiFaster")}</button>
+                <span className="ml-2 text-[11px] text-mute">{t("aiNote")}</span>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

@@ -28,7 +28,7 @@ export const en = {
   ocrWarn: "Photo reading often drops or swaps digits. Compare every character with the label before you check.",
   ocrNone: "Could not read a batch number. Try a flatter, brighter photo, or type it.",
   ocrWhere: "Read on your device. The photo never leaves your phone.", ocrServer: "Read by an AI vision model on our server (the photo is not stored). Confirm it matches the label.",
-  aiTry: "Not right? Try AI reading", aiNote: "Sends this one photo to an AI vision model on our server. It is not stored.", aiWorking: "Reading with AI…",
+  aiTry: "Not right? Try AI reading", aiFaster: "Taking long? Read with AI instead", aiNote: "Sends this one photo to an AI vision model on our server. It is not stored.", aiWorking: "Reading with AI…",
   // verdict
   flagged: "flagged", possible: "possible match", notFoundK: "not found",
   pillContam: "contamination", pillSpurious: "spurious", pillQuality: "quality fail",
@@ -80,7 +80,7 @@ export const en = {
   abWhy: "Why Arkiv", abWhyP: "A normal database has an administrator, and an administrator can be asked to remove a record. Arkiv gives us three things a normal database does not:",
   w1: "Records created read-only: their contents can never change.", w2: "Ownership sent to a burn address after creation, so not even the wallet that wrote an alert can delete it.", w3: "Built-in expiry that follows a real date, the printed expiry of the batch.",
   abLimits: "What this cannot tell you", l1: "Not found is not proof a medicine is safe. Most bad batches are never listed.", l2: "Short batch numbers repeat across products, so check the product name and maker too.",
-  l3: "We mirror public lists; the regulators do not sign records on Arkiv. Each record links to its source.", l4: "Photo reading is a suggestion. Always check the batch it reads against the label.",
+  l3: "We mirror public lists; the regulators do not sign records on Arkiv. Each record links to its source.", l4: "Photo reading is a suggestion. Always check the batch it reads against the label. By default the photo is read on your device and never leaves it; only if you tap the AI button is that one photo sent to an AI vision model on our server (it is not stored).",
 }
 
 export type Key = keyof typeof en
@@ -109,7 +109,7 @@ export const hi: Partial<typeof en> = {
   ocrWarn: "फोटो से पढ़ने में अक्सर अंक छूट जाते हैं या बदल जाते हैं। जाँचने से पहले हर अक्षर लेबल से मिलाएँ।",
   ocrNone: "बैच नंबर नहीं पढ़ पाए। सीधी, उजली फोटो लें या खुद टाइप करें।",
   ocrWhere: "आपके डिवाइस पर पढ़ा गया। फोटो फोन से बाहर नहीं जाती।", ocrServer: "हमारे सर्वर पर AI विज़न मॉडल ने पढ़ा (फोटो सहेजी नहीं जाती)। लेबल से मिलाकर पुष्टि करें।",
-  aiTry: "सही नहीं? AI से पढ़वाएँ", aiNote: "यह एक फोटो हमारे सर्वर पर AI विज़न मॉडल को भेजी जाएगी। इसे सहेजा नहीं जाता।", aiWorking: "AI से पढ़ रहे हैं…",
+  aiTry: "सही नहीं? AI से पढ़वाएँ", aiFaster: "देर लग रही है? AI से पढ़वाएँ", aiNote: "यह एक फोटो हमारे सर्वर पर AI विज़न मॉडल को भेजी जाएगी। इसे सहेजा नहीं जाता।", aiWorking: "AI से पढ़ रहे हैं…",
   flagged: "चिह्नित", possible: "संभावित मेल", notFoundK: "नहीं मिला",
   pillContam: "मिलावट", pillSpurious: "नकली", pillQuality: "गुणवत्ता विफल",
   head3: "खतरनाक मिलावट की सूचना", head2: "नकली या फर्जी के रूप में चिह्नित", head1: "यह बैच गुणवत्ता जाँच में विफल रहा",
@@ -156,5 +156,5 @@ export const hi: Partial<typeof en> = {
   abWhy: "Arkiv क्यों", abWhyP: "सामान्य डेटाबेस का एक एडमिन होता है, और एडमिन से कोई रिकॉर्ड हटाने को कहा जा सकता है। Arkiv हमें तीन चीज़ें देता है:",
   w1: "केवल-पढ़ने वाले रिकॉर्ड: उनकी सामग्री कभी नहीं बदल सकती।", w2: "बनने के बाद स्वामित्व एक बर्न एड्रेस को भेज दिया जाता है, इसलिए अलर्ट लिखने वाला वॉलेट भी उसे मिटा नहीं सकता।", w3: "असली तारीख के अनुसार अपने-आप समाप्ति: बैच की छपी एक्सपायरी।",
   abLimits: "यह क्या नहीं बता सकता", l1: "सूची में न मिलना दवा के सुरक्षित होने का प्रमाण नहीं है। ज़्यादातर खराब बैच कभी सूचीबद्ध नहीं होते।", l2: "छोटे बैच नंबर कई दवाओं में दोहराए जाते हैं, इसलिए दवा का नाम और निर्माता भी देखें।",
-  l3: "हम सार्वजनिक सूचियाँ दोहराते हैं; नियामक Arkiv पर हस्ताक्षर नहीं करते। हर रिकॉर्ड अपने स्रोत से जुड़ा है।", l4: "फोटो से पढ़ना एक सुझाव है। पढ़े गए बैच को हमेशा लेबल से मिलाएँ।",
+  l3: "हम सार्वजनिक सूचियाँ दोहराते हैं; नियामक Arkiv पर हस्ताक्षर नहीं करते। हर रिकॉर्ड अपने स्रोत से जुड़ा है।", l4: "फोटो से पढ़ना एक सुझाव है। पढ़े गए बैच को हमेशा लेबल से मिलाएँ। सामान्यतः फोटो आपके डिवाइस पर पढ़ी जाती है और बाहर नहीं जाती; केवल AI बटन दबाने पर वह एक फोटो हमारे सर्वर पर AI विज़न मॉडल को भेजी जाती है (सहेजी नहीं जाती)।",
 }

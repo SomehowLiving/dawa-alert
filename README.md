@@ -88,15 +88,17 @@ submission form.
 vercel link --project dawa-alert
 printf '%s' "$PRIVATE_KEY"     | vercel env add PRIVATE_KEY production --sensitive
 printf '%s' "$ARKIV_API_KEY"   | vercel env add ARKIV_API_KEY production --sensitive
-vercel deploy --prod
+printf '%s' "$GEMINI_API_KEY"  | vercel env add GEMINI_API_KEY production --sensitive   # optional: the "Try AI reading" button
+./scripts/deploy.sh
 ```
 
-Commit with your GitHub **numeric** no-reply address (`ID+username@users.noreply.github.com`, see github.com/settings/emails).
-On the Hobby plan Vercel blocks any deploy whose git author it cannot map to a team member ("commit author doesn't have
-permission"), and the legacy `username@users.noreply.github.com` form does not resolve.
+Use `scripts/deploy.sh`, not a bare `vercel deploy`: once the repo is on GitHub the CLI attaches the commit author, and on the Hobby
+plan Vercel **blocks** any deployment whose author it cannot map to a team member ("commit author doesn't have permission"; the
+legacy `username@users.noreply.github.com` form never resolves). The script builds locally and uploads the output from a copy with no `.git`.
+If you use Vercel's GitHub integration instead, commit with the numeric no-reply address (`ID+username@users.noreply.github.com`).
 
-Only those two variables are required (add `ANTHROPIC_API_KEY` to read photos with Claude vision). Run `npm run seed` /
-`npm run stats` locally to publish data and the dashboard snapshot; the deployed app only reads (plus the sighting relay).
+`PRIVATE_KEY` and `ARKIV_API_KEY` are the only required variables. Run `npm run seed` / `npm run stats` locally to publish data and the
+dashboard snapshot; the deployed app only reads (plus the sighting relay and, if enabled, AI reading).
 
 ## Structure
 
