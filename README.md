@@ -13,6 +13,19 @@ alert for the three contaminated syrups and Telangana's stop-use notices.
 **Live:** https://dawa-alert.vercel.app (Tiramisu testnet). Source data and the entities it reads are public; the relay wallet that
 creates sightings is listed in [arkiv/schema.md](arkiv/schema.md).
 
+## Screenshots
+
+![Home: check a batch, scan a label, live stats](assets/home.png)
+
+| | |
+|---|---|
+| ![A flagged batch: the verdict card with its source, expiry and Arkiv lock](assets/flagged.png) | ![Every live alert, filterable by type, authority and month](assets/alert.png) |
+| **A flagged batch.** The verdict names the authority, the reason and the source, and marks the record "Unchangeable on Arkiv". | **Every live alert.** Browse and filter the full set by type, authority and month. |
+
+The same record in the Arkiv data explorer: owner is the burn address, the entity is `readonly`, and it expires with the batch.
+
+![The alert's Arkiv entity in the data explorer: readonly, owner 0x…dEaD, attributes and expiry](assets/arkiv.png)
+
 ## Why this needs to exist
 
 Contaminated or substandard medicine reaching children is not a one-off. The cases below are all documented in official notices,
