@@ -6,7 +6,8 @@ import { normBatch, normProduct } from "./normalize.ts"
 import { computeStats, countSightings, readStatsSnapshot } from "./stats.ts"
 import {
   BadRequest,
-  browseAlerts,
+  loadAllAlerts,
+  pageAlerts,
   checkBatch,
   recentAlerts,
   recordSighting,
@@ -105,9 +106,10 @@ export function createApi({ pub, wallet, ratePerHour = 20, now = Date.now, ocr }
       if (sev && !["1", "2", "3"].includes(sev)) throw new BadRequest("severity must be 1, 2 or 3")
       if (authority && !AUTHORITIES.includes(authority)) throw new BadRequest(`authority must be one of ${AUTHORITIES.join(", ")}`)
       if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new BadRequest("month must look like 2026-08")
-      if (cursor && cursor.length > 2000) throw new BadRequest("bad cursor")
+      if (cursor && !/^o:\d{1,6}$/.test(cursor)) throw new BadRequest("bad cursor")
       const params = { ...(sev && { severity: Number(sev) }), ...(authority && { authority }), ...(month && { month }), ...(cursor && { cursor }) }
-      return json(await memo(`browse:${JSON.stringify(params)}`, 60_000, () => browseAlerts(pub, params)))
+      const all = await memo("browse:all", 5 * 60_000, () => loadAllAlerts(pub, new Date(now())), { swr: true })
+      return json(pageAlerts(all, params))
     },
 
     "GET /api/recent": async () => json({ results: await memo("recent", 5 * 60_000, () => recentAlerts(pub, new Date(now())), { swr: true }) }),

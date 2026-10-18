@@ -26,7 +26,7 @@ export function fake(rows: Row[]): PublicClient {
             hasNextPage: () => false,
             next: async () => { throw new Error("no more pages") },
             entities: hits.map((r) => ({
-              key: `0x${Math.random().toString(16).slice(2)}`,
+              key: `0x${(rows.indexOf(r) + 1).toString(16).padStart(64, "0")}`,
               owner: "0x000000000000000000000000000000000000dEaD",
               expiresAt: 123n,
               creationFlags: { readonly: true },

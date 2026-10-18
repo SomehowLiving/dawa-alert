@@ -162,6 +162,28 @@ export async function browseAlerts(client: PublicClient, p: BrowseParams = {}) {
   }
 }
 
+const BROWSE_PAGE = 40
+
+/**
+ * Browse without node cursors: the node refuses deep cursors (and a cursor from a shared RPC can fail on page 2),
+ * so the API loads the whole alert set once, caches it, and pages through it with a plain offset.
+ */
+export async function loadAllAlerts(client: PublicClient, now = new Date()): Promise<Match[]> {
+  const rows = await collectAlerts(client, { key: true, owner: true, attributes: true, payload: true, expiresAt: true, creationFlags: true }, now)
+  const seen = new Set<string>()
+  return rows
+    .map((e: any) => toMatch(e, null))
+    .filter((m: Match) => !isHidden(m) && !seen.has(m.key) && !!seen.add(m.key))
+    .sort((a: Match, b: Match) => b.severity - a.severity || String(b.listMonth).localeCompare(String(a.listMonth)))
+}
+
+export function pageAlerts(all: Match[], p: BrowseParams = {}) {
+  const rows = all.filter((m) => (!p.severity || m.severity === p.severity) && (!p.authority || m.authority === p.authority) && (!p.month || m.listMonth === p.month))
+  const start = p.cursor?.startsWith("o:") ? Math.max(0, Number(p.cursor.slice(2)) || 0) : 0
+  const end = start + (p.limit ?? BROWSE_PAGE)
+  return { results: rows.slice(start, end), next: end < rows.length ? `o:${end}` : null, capped: false, total: rows.length }
+}
+
 /** Alerts published in the last couple of months, worst first: the "recently flagged" feed. */
 export async function recentAlerts(client: PublicClient, now = new Date(), limit = 12) {
   const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 2, 1))
@@ -267,7 +289,7 @@ const ymFromIndex = (i: number) => Math.floor(i / 12) * 100 + (i % 12) + 1
  */
 export async function collectAlerts(client: PublicClient, selection: Record<string, unknown>, now = new Date()): Promise<any[]> {
   const lastYm = now.getUTCFullYear() * 100 + now.getUTCMonth() + 1 + 1 // include next month
-  const walk = async (lo: number, hi: number): Promise<any[]> => {
+  const walk = async (lo: number, hi: number, attempt = 0): Promise<any[]> => {
     try {
       const rows: any[] = []
       let page = await (client as any)
@@ -282,9 +304,13 @@ export async function collectAlerts(client: PublicClient, selection: Record<stri
       }
       return rows
     } catch (err) {
-      if (err instanceof QueryError && err.kind === "cursor" && lo < hi) {
-        const mid = Math.floor((lo + hi) / 2)
-        return [...(await walk(lo, mid)), ...(await walk(mid + 1, hi))]
+      if (err instanceof QueryError && err.kind === "cursor") {
+        if (lo < hi) {
+          const mid = Math.floor((lo + hi) / 2)
+          return [...(await walk(lo, mid)), ...(await walk(mid + 1, hi))]
+        }
+        // a single month: the cursor was tied to a block that has since moved on, so start the page-through again
+        if (attempt < 3) return walk(lo, hi, attempt + 1)
       }
       throw err
     }

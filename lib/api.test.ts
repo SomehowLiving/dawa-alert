@@ -152,6 +152,19 @@ describe("GET /api/browse", () => {
     expect(j.capped).toBe(false)
     expect(j.results.map((m: any) => m.product)).not.toContain("ZZ Dawa LiveTest Syrup")
   })
+  it("pages through every alert with an offset cursor", async () => {
+    const many: Row[] = Array.from({ length: 95 }, (_, i) => ({ kind: "alert", batch_norm: `B${i}`, authority: "CDSCO", severity: 1, product: `Drug ${i}`, batch: `B${i}`, src: "cdsco_portal_nsq", list_ym: 202601 }))
+    const a = createApi({ pub: fake(many) })
+    const seen: string[] = []
+    let cursor = ""
+    for (let i = 0; i < 5; i++) {
+      const j = (await (await a.request(`/api/browse${cursor ? `?cursor=${cursor}` : ""}`)).json()) as any
+      seen.push(...j.results.map((m: any) => m.batch))
+      if (!j.next) break
+      cursor = j.next
+    }
+    expect(new Set(seen).size).toBe(95)
+  })
   it.each(["severity=9", "authority=Nobody", "month=2026-13", "month=Aug-2026"])("rejects %s", async (q) => {
     expect((await app.request(`/api/browse?${q}`)).status).toBe(400)
   })
