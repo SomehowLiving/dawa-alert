@@ -8,7 +8,7 @@
 import { parseLabel, type OcrLine } from "./label.ts"
 
 const ANGLES = [0, -10, 10, -15, 15, -5, 5, -20, 20]
-const PADDLE_ANGLES = [0, -10, 10, -20, 20] // PaddleOCR reads most photos upright; rotations are the rare fallback
+const PADDLE_ANGLES = [0, -15, 15] // PaddleOCR reads most photos upright; a label it cannot read is better handed to the AI button than retried five times
 const ORT_VERSION = "1.30.0" // must match the installed onnxruntime-web
 const MODELS = {
   det: { name: "PP-OCRv5_mobile_det", url: "/ocr/PP-OCRv5_mobile_det_onnx_infer.tar" },

@@ -18,6 +18,16 @@ describe("findBatch", () => {
     // Actual Tesseract output for a tilted label whose true batch is A1254.
     expect(findBatch("Coldrif\nCough Sy, up\nBatch No, A12\nMfg. Date 12/20\nExp. Date 11/2")).toBe("A12")
   })
+  // Strings below are what the readers actually returned on real photos (Wikimedia Commons test set).
+  it("reads a keyword glued to its value, as on a real foil strip", () => {
+    expect(findBatch("axos\nLOTC540425\nMANFD 07-201")).toBe("C540425")
+    expect(findBatch("LOTUS blossom tablets")).toBeNull() // a word, not a batch
+  })
+  it("reads Russian and Hindi batch keywords", () => {
+    expect(findBatch("04603276012362\nСерия 490724\nГоден до 0727")).toBe("490724")
+    expect(findBatch("Серия\n490724")).toBe("490724")
+    expect(findBatch("बैच नं. A1254")).toBe("A1254")
+  })
   it("reads a keyword and its value from separate boxes (PaddleOCR style)", () => {
     expect(findBatch("Coldrif\nCough Syrup\nBatch No.\nA1254\nMfg. Date\n12/2024\nExp. Date\n11/2026")).toBe("A1254")
     expect(findBatch("B.No.:\nSR-13")).toBe("SR-13")

@@ -7,6 +7,11 @@ const NOT_BATCH = /^(mfg|mfd|exp|date|no|dt|price|mrp|each|ml|mg|use|by)$/i
 const LABEL_WORDS = /\b(batch|b\.?\s*no|lot|mfg|mfd|manufactur|exp|expiry|date|mrp|price|each|contains|store|keep|dosage|use|schedule|rx|only|ip|bp|usp)\b/i
 
 const KEY_ONLY = new RegExp(String.raw`^\s*${KEY}\s*[.,:;\-#]*\s*$`, "i")
+// Real photos: the keyword is sometimes glued to the value ("LOTC540425"), and packs for other markets use their own words
+// (Russian "Серия"/"Партия", Hindi "बैच"). A glued value must contain a digit and be at least 4 characters, so "LOTUS" is safe.
+const GLUED = /\b(?:lot|batch|b\.?\s*no\.?)([A-Z]?\d[A-Z0-9\-\/]{3,19})\b/i
+const LOCAL_KEY = /(?:серия|серии|партия|лот|बैच)\s*(?:№|no\.?|नं\.?)?\s*[.,:;\-#]*\s*([A-Z0-9][A-Z0-9\-\/]{1,19})/iu
+const LOCAL_KEY_ONLY = /^\s*(?:серия|серии|партия|лот|बैच)\s*(?:№|no\.?|नं\.?)?\s*[.,:;\-#]*\s*$/iu
 const DATE_LIKE = /^\d{1,2}[/\-.]\d{2,4}$|^\d{4}$/ // an expiry or manufacturing date is never the batch
 
 const clean = (tok: string) => tok.replace(/[\-\/]+$/, "")
@@ -23,7 +28,12 @@ export function findBatch(text: string): string | null {
       const tok = clean(m[1]!)
       if (plausible(tok)) return tok.toUpperCase()
     }
-    if (KEY_ONLY.test(lines[i]!)) {
+    for (const re of [GLUED, LOCAL_KEY]) {
+      const g = re.exec(lines[i]!)
+      const tok = g ? clean(g[1]!) : ""
+      if (tok && plausible(tok)) return tok.toUpperCase()
+    }
+    if (KEY_ONLY.test(lines[i]!) || LOCAL_KEY_ONLY.test(lines[i]!)) {
       const next = /^\s*[.,:;\-#]*\s*([A-Z0-9][A-Z0-9\-\/]{1,19})\b/i.exec(lines[i + 1] ?? "")
       const tok = next ? clean(next[1]!) : ""
       if (tok && plausible(tok)) return tok.toUpperCase()
