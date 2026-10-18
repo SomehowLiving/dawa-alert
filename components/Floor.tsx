@@ -49,8 +49,8 @@ export function Floor() {
       {/* hero */}
       <section className="glass relative isolate overflow-hidden rounded-[32px] p-6 md:p-9 lg:min-h-[560px]">
         <Image src="/brand/hero.jpg" alt="" fill priority sizes="(min-width: 1024px) 60vw, 100vw" className="-z-10 object-cover object-[88%_40%] opacity-90" />
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,#07050c_0%,#07050c_36%,rgba(7,5,12,0.62)_60%,rgba(7,5,12,0.05)_100%)]" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#07050c] via-transparent to-transparent" />
+        <div className="hero-fade-x absolute inset-0 -z-10" />
+        <div className="hero-fade-y absolute inset-0 -z-10" />
         <div className="flex h-full max-w-[26rem] flex-col">
           <Label>{t("eyebrow")}</Label>
           <h1 className="mt-4 max-w-[5em] font-[family-name:var(--font-serif)] text-[54px] italic leading-[0.98] tracking-tight md:text-[72px]">{t("heroTitle")}</h1>

@@ -3,7 +3,7 @@
 export const en = {
   // nav + chrome
   navFloor: "floor", navAlerts: "alerts", navMap: "map", navReport: "report", navAbout: "about",
-  tagline: "recall alerts on arkiv", langBtn: "हिन्दी",
+  tagline: "recall alerts on arkiv", langBtn: "हिन्दी", themeLight: "Switch to light mode", themeDark: "Switch to dark mode",
   indexed: "indexed through", alertsWord: "live alerts", sightsWord: "sightings", block: "block",
   foot: "Source data: CDSCO NSQ and spurious lists, WHO Medical Product Alert N°5/2025, Telangana DCA notices (press reports).",
   // hero
@@ -87,7 +87,7 @@ export type Key = keyof typeof en
 
 export const hi: Partial<typeof en> = {
   navFloor: "होम", navAlerts: "अलर्ट", navMap: "नक्शा", navReport: "रिपोर्ट", navAbout: "परिचय",
-  tagline: "Arkiv पर रिकॉल अलर्ट", langBtn: "English",
+  tagline: "Arkiv पर रिकॉल अलर्ट", langBtn: "English", themeLight: "लाइट मोड में जाएँ", themeDark: "डार्क मोड में जाएँ",
   indexed: "डेटा तक", alertsWord: "सक्रिय अलर्ट", sightsWord: "रिपोर्ट", block: "ब्लॉक",
   foot: "स्रोत डेटा: CDSCO NSQ और नकली दवा सूचियाँ, WHO मेडिकल प्रोडक्ट अलर्ट N°5/2025, तेलंगाना DCA की सूचनाएँ (समाचार रिपोर्ट)।",
   eyebrow: "सार्वजनिक अलर्ट · सुरक्षित दवाएँ", heroTitle: "इस्तेमाल से पहले जाँचें।",
