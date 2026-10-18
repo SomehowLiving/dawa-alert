@@ -1,0 +1,31 @@
+# dependencies and build output
+node_modules
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+coverage
+.vercel
+
+# secrets and local config: NEVER commit. Keep a template in .env.example
+.env
+.env.*
+!.env.example
+
+# raw third-party downloads: regenerate with `npm run data:portal` / `npm run data:pdf`.
+# (CDSCO's and WHO's reuse terms were not confirmed, and these are large.)
+# Only the small fixture used by lib/data.test.ts is kept.
+data/raw/*
+!data/raw/nsq-2025-03.pdf
+data/raw/*.tmp
+
+# editor / OS
+.DS_Store
+.idea
+.vscode
+*.log
+*.tmp
+
+# python
+__pycache__/
+*.pyc

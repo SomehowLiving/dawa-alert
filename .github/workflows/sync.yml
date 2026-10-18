@@ -1,0 +1,19 @@
+# Daily refresh: re-fetch CDSCO's portal and write only new alerts to Arkiv (seeding is idempotent).
+# Needs repository secrets ARKIV_PRIVATE_KEY (a funded Tiramisu testnet key) and ARKIV_API_KEY.
+name: sync
+on:
+  schedule: [{ cron: "30 2 * * *" }]
+  workflow_dispatch:
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci
+      - run: python3 -I scripts/fetch_portal.py   # aborts if the portal returns nothing or shrinks >20%
+      - run: node scripts/seed.ts
+        env:
+          PRIVATE_KEY: ${{ secrets.ARKIV_PRIVATE_KEY }}
+          ARKIV_API_KEY: ${{ secrets.ARKIV_API_KEY }}
