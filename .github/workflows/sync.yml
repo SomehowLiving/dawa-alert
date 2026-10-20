@@ -7,13 +7,24 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      HAS_KEYS: ${{ secrets.ARKIV_PRIVATE_KEY != '' && secrets.ARKIV_API_KEY != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Skip when the repository secrets are not set
+        if: env.HAS_KEYS != 'true'
+        run: echo "::notice::ARKIV_PRIVATE_KEY and ARKIV_API_KEY are not set as repository secrets, so the daily sync is skipped."
+
+      - if: env.HAS_KEYS == 'true'
+        uses: actions/checkout@v4
+      - if: env.HAS_KEYS == 'true'
+        uses: actions/setup-node@v4
         with: { node-version: 24 }
-      - run: npm ci
-      - run: python3 -I scripts/fetch_portal.py   # aborts if the portal returns nothing or shrinks >20%
-      - run: node scripts/seed.ts
+      - if: env.HAS_KEYS == 'true'
+        run: npm ci
+      - if: env.HAS_KEYS == 'true'
+        run: python3 -I scripts/fetch_portal.py   # aborts if the portal returns nothing or shrinks >20%
+      - if: env.HAS_KEYS == 'true'
+        run: node scripts/seed.ts
         env:
           PRIVATE_KEY: ${{ secrets.ARKIV_PRIVATE_KEY }}
           ARKIV_API_KEY: ${{ secrets.ARKIV_API_KEY }}
